@@ -73,7 +73,7 @@ const Stats = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative -mt-16 z-20 px-4 md:px-6 mb-12"
+      className="relative mt-0 md:-mt-12 lg:-mt-16 z-20 px-4 md:px-6 mb-12"
     >
       <div className="container mx-auto">
         <div className="bg-navy-gradient rounded-2xl border-4 border-accent p-6 md:p-8 shadow-strong">

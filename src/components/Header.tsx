@@ -102,22 +102,23 @@ const Header = () => {
 
         {/* Mobile Menu Button */}
         <button
-          className="lg:hidden text-primary-foreground p-2"
+          className="lg:hidden text-primary-foreground p-2 hover:bg-primary-foreground/10 rounded-lg transition-colors"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Menu"
         >
           {isMobileMenuOpen ? (
-            <X className="w-6 h-6" />
+            <X className="w-7 h-7" />
           ) : (
-            <Menu className="w-6 h-6" />
+            <Menu className="w-7 h-7" />
           )}
         </button>
       </div>
 
       {/* Mobile Menu */}
       <div
-        className={`lg:hidden absolute top-full left-0 right-0 bg-primary/98 backdrop-blur-md transition-all duration-300 overflow-hidden ${
+        className={`lg:hidden absolute top-full left-0 right-0 bg-primary backdrop-blur-md shadow-2xl transition-all duration-300 overflow-hidden ${
           isMobileMenuOpen
-            ? "max-h-96 border-t border-primary-foreground/10"
+            ? "max-h-[500px] border-t border-accent/30"
             : "max-h-0"
         }`}
       >
@@ -126,14 +127,14 @@ const Header = () => {
             <Link
               key={link.name}
               to={link.href}
-              className="text-primary-foreground/80 hover:text-accent font-medium py-3 px-4 transition-colors duration-200 text-sm uppercase tracking-wider"
+              className="text-primary-foreground hover:text-accent hover:bg-accent/10 font-medium py-3 px-4 rounded-lg transition-all duration-200 text-base uppercase tracking-wider"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {link.name}
             </Link>
           ))}
-          <div className="px-4 pt-4 pb-2">
-            <div className="flex items-center justify-center gap-6 py-3">
+          <div className="px-4 pt-4 pb-2 border-t border-primary-foreground/20 mt-2">
+            <div className="flex items-center justify-center gap-6 py-4">
               {socialLinks.map((social) => {
                 const Icon = social.icon;
                 return (
@@ -142,17 +143,22 @@ const Header = () => {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary-foreground/70 hover:text-accent transition-colors duration-200"
+                    className="text-primary-foreground hover:text-accent transition-all duration-200 hover:scale-110"
                     aria-label={social.name}
                   >
-                    <Icon className="w-6 h-6" />
+                    <Icon className="w-7 h-7" />
                   </a>
                 );
               })}
             </div>
           </div>
           <div className="px-4 pt-2 pb-4">
-            <Button variant="accent" size="lg" className="w-full">
+            <Button
+              variant="accent"
+              size="lg"
+              className="w-full text-base font-bold shadow-lg hover:shadow-orange-lg"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               Solicite Orçamento
             </Button>
           </div>
