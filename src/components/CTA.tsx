@@ -17,8 +17,8 @@ const CTA = () => {
             <span className="text-gradient">relação com a energia?</span>
           </h2>
           <p className="mt-6 text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto leading-relaxed">
-            Entre em contato conosco e descubra como podemos ajudar você a economizar
-            e contribuir para um futuro mais sustentável.
+            Entre em contato conosco e descubra como podemos ajudar você a
+            economizar e contribuir para um futuro mais sustentável.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -30,11 +30,11 @@ const CTA = () => {
 
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-8 text-primary-foreground/70">
             <a
-              href="tel:+5511999999999"
+              href="tel:+5579998305785"
               className="flex items-center gap-3 hover:text-accent transition-colors"
             >
               <Phone className="w-5 h-5" />
-              <span>(11) 99999-9999</span>
+              <span>(79) 99830-5785</span>
             </a>
             <a
               href="mailto:contato@norsel.com.br"

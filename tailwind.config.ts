@@ -96,6 +96,10 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "bounce-slow": {
+          "0%, 100%": { transform: "translateY(-5%)", animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)" },
+          "50%": { transform: "translateY(0)", animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -105,6 +109,7 @@ export default {
         "scale-in": "scale-in 0.5s ease-out forwards",
         "slide-right": "slide-right 0.6s ease-out forwards",
         float: "float 3s ease-in-out infinite",
+        "bounce-slow": "bounce-slow 2s infinite",
       },
       boxShadow: {
         'soft': '0 2px 8px hsl(213 60% 18% / 0.08)',

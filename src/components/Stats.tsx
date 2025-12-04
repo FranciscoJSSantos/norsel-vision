@@ -41,7 +41,7 @@ const AnimatedCounter = ({
   }, [value, isVisible]);
 
   return (
-    <span className="text-4xl md:text-5xl font-heading font-bold text-primary-foreground">
+    <span className="text-3xl md:text-4xl font-heading font-bold text-primary-foreground">
       {count}
       {suffix}
     </span>
@@ -73,15 +73,15 @@ const Stats = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative -mt-16 z-20 px-4 md:px-6"
+      className="relative -mt-16 z-20 px-4 md:px-6 mb-12"
     >
       <div className="container mx-auto">
-        <div className="bg-navy-gradient rounded-2xl border-4 border-accent p-8 md:p-12 shadow-strong">
-          <h2 className="text-center text-lg md:text-xl font-heading font-bold text-accent uppercase tracking-wider mb-10">
+        <div className="bg-navy-gradient rounded-2xl border-4 border-accent p-6 md:p-8 shadow-strong">
+          <h2 className="text-center text-base md:text-lg font-heading font-bold text-accent uppercase tracking-wider mb-6">
             Credibilidade se constrói com experiência, números e entregas reais.
           </h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-6">
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-4">
             {stats.map((stat, index) => (
               <div
                 key={stat.label}
