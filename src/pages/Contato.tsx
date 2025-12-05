@@ -27,7 +27,9 @@ const Contato = () => {
   }, [location]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     setFormData({
       ...formData,
@@ -42,7 +44,10 @@ const Contato = () => {
     const mensagemWhatsApp = `*Nova Solicitação de Contato*%0A%0A*Nome:* ${formData.nome}%0A*Email:* ${formData.email}%0A*Telefone:* ${formData.telefone}%0A*Cidade/Estado:* ${formData.cidade}%0A*Serviço de Interesse:* ${formData.servico}%0A*Mensagem:* ${formData.mensagem}`;
 
     // Redirecionar para WhatsApp
-    window.open(`https://wa.me/5579998414129?text=${mensagemWhatsApp}`, "_blank");
+    window.open(
+      `https://wa.me/5579998414129?text=${mensagemWhatsApp}`,
+      "_blank"
+    );
 
     // Limpar formulário
     setFormData({
@@ -79,7 +84,10 @@ const Contato = () => {
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label htmlFor="nome" className="block text-sm font-medium mb-2">
+                    <label
+                      htmlFor="nome"
+                      className="block text-sm font-medium mb-2"
+                    >
                       Nome completo *
                     </label>
                     <input
@@ -94,7 +102,10 @@ const Contato = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-2">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium mb-2"
+                    >
                       E-mail *
                     </label>
                     <input
@@ -109,7 +120,10 @@ const Contato = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="telefone" className="block text-sm font-medium mb-2">
+                    <label
+                      htmlFor="telefone"
+                      className="block text-sm font-medium mb-2"
+                    >
                       Telefone *
                     </label>
                     <input
@@ -124,7 +138,10 @@ const Contato = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="cidade" className="block text-sm font-medium mb-2">
+                    <label
+                      htmlFor="cidade"
+                      className="block text-sm font-medium mb-2"
+                    >
                       Cidade/Estado *
                     </label>
                     <input
@@ -139,7 +156,10 @@ const Contato = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="servico" className="block text-sm font-medium mb-2">
+                    <label
+                      htmlFor="servico"
+                      className="block text-sm font-medium mb-2"
+                    >
                       Serviço de interesse *
                     </label>
                     <select
@@ -151,17 +171,28 @@ const Contato = () => {
                       className="w-full px-4 py-2 rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-accent"
                     >
                       <option value="">Selecione um serviço</option>
-                      <option value="Energia Solar Residencial">Energia Solar Residencial</option>
-                      <option value="Energia Solar Comercial">Energia Solar Comercial</option>
-                      <option value="Projetos Elétricos">Projetos Elétricos</option>
-                      <option value="Manutenção e Monitoramento">Manutenção e Monitoramento</option>
+                      <option value="Energia Solar Residencial">
+                        Energia Solar Residencial
+                      </option>
+                      <option value="Energia Solar Comercial">
+                        Energia Solar Comercial
+                      </option>
+                      <option value="Projetos Elétricos">
+                        Projetos Elétricos
+                      </option>
+                      <option value="Manutenção e Monitoramento">
+                        Manutenção e Monitoramento
+                      </option>
                       <option value="Consultoria">Consultoria</option>
                       <option value="Outros">Outros</option>
                     </select>
                   </div>
 
                   <div>
-                    <label htmlFor="mensagem" className="block text-sm font-medium mb-2">
+                    <label
+                      htmlFor="mensagem"
+                      className="block text-sm font-medium mb-2"
+                    >
                       Mensagem
                     </label>
                     <textarea
@@ -174,7 +205,12 @@ const Contato = () => {
                     />
                   </div>
 
-                  <Button type="submit" variant="accent" size="lg" className="w-full">
+                  <Button
+                    type="submit"
+                    variant="accent"
+                    size="lg"
+                    className="w-full"
+                  >
                     Enviar mensagem
                   </Button>
                 </form>
@@ -190,27 +226,33 @@ const Contato = () => {
                   <div className="space-y-6">
                     {/* WhatsApp */}
                     <a
-                      href="https://wa.me/5579998414129"
+                      href="https://wa.me/5579998305785"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-start gap-4 p-4 rounded-lg hover:bg-accent/10 transition-colors group"
                     >
                       <Phone className="w-6 h-6 text-accent mt-1 group-hover:scale-110 transition-transform" />
                       <div>
-                        <h3 className="font-semibold mb-1">WhatsApp / Telefone</h3>
-                        <p className="text-muted-foreground">+55 (79) 99841-4129</p>
+                        <h3 className="font-semibold mb-1">
+                          WhatsApp / Telefone
+                        </h3>
+                        <p className="text-muted-foreground">
+                          +55 (79) 99830-5785
+                        </p>
                       </div>
                     </a>
 
                     {/* Email */}
                     <a
-                      href="mailto:franciscodragon2013.com.br"
+                      href="mailto:contato@norsel.com.br"
                       className="flex items-start gap-4 p-4 rounded-lg hover:bg-accent/10 transition-colors group"
                     >
                       <Mail className="w-6 h-6 text-accent mt-1 group-hover:scale-110 transition-transform" />
                       <div>
                         <h3 className="font-semibold mb-1">E-mail</h3>
-                        <p className="text-muted-foreground">franciscodragon2013.com.br</p>
+                        <p className="text-muted-foreground">
+                          contato@norsel.com.br
+                        </p>
                       </div>
                     </a>
 
@@ -220,7 +262,8 @@ const Contato = () => {
                       <div>
                         <h3 className="font-semibold mb-1">Endereço</h3>
                         <p className="text-muted-foreground">
-                          Rua Urquiza Leal, 98<br />
+                          Rua Urquiza Leal, 98
+                          <br />
                           Aracaju/SE - CEP 49020-490
                         </p>
                       </div>
@@ -230,9 +273,12 @@ const Contato = () => {
                     <div className="flex items-start gap-4 p-4">
                       <Clock className="w-6 h-6 text-accent mt-1" />
                       <div>
-                        <h3 className="font-semibold mb-1">Horário de Atendimento</h3>
+                        <h3 className="font-semibold mb-1">
+                          Horário de Atendimento
+                        </h3>
                         <p className="text-muted-foreground">
-                          Segunda a Sexta<br />
+                          Segunda a Sexta
+                          <br />
                           9h às 18h
                         </p>
                       </div>
