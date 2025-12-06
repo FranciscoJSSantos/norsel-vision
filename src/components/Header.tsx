@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Instagram, Linkedin, Youtube } from "lucide-react";
+import { Menu, X, Instagram, Linkedin, Youtube, User } from "lucide-react";
 import { Button } from "./ui/button";
 import norselLogo from "../assets/logo_norsel_dark.png";
 import NorselLogo from "../brand/NorselLogo";
@@ -51,24 +51,31 @@ const Header = () => {
         isScrolled ? "shadow-strong py-2" : "py-3"
       }`}
     >
-      <div className="container mx-auto flex items-center justify-between">
+      <div className="container mx-auto px-6 flex items-center justify-between gap-8">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
+        <Link
+          to="/"
+          className="flex items-center gap-2 group flex-shrink-0"
+        >
           {/* <img
             src={norselLogo}
             alt="Norsel Engenharia"
             className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
           /> */}
-          <NorselLogo width={180} height={55} className="transition-transform duration-300 group-hover:scale-105" />
+          <NorselLogo
+            width={180}
+            height={55}
+            className="transition-transform duration-300 group-hover:scale-105"
+          />
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center max-w-3xl">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.href}
-              className="text-primary-foreground/80 hover:text-accent font-medium transition-colors duration-200 text-sm uppercase tracking-wider"
+              className="text-primary-foreground/80 hover:text-accent font-medium transition-colors duration-200 text-sm uppercase tracking-wider whitespace-nowrap"
             >
               {link.name}
             </Link>
@@ -76,8 +83,8 @@ const Header = () => {
         </nav>
 
         {/* Social Links & CTA Button */}
-        <div className="hidden lg:flex items-center gap-4">
-          <div className="flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
+          <div className="flex items-center gap-3 pr-2">
             {socialLinks.map((social) => {
               const Icon = social.icon;
               return (
@@ -97,6 +104,22 @@ const Header = () => {
           <div className="w-px h-6 bg-primary-foreground/20" />
           <Button variant="accent" size="default">
             Solicite Orçamento
+          </Button>
+          <Button
+            variant="outline"
+            size="default"
+            className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+            asChild
+          >
+            <a
+              href="https://norsel.com.br/administrativo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+            >
+              <User className="w-4 h-4" />
+              Área Cliente
+            </a>
           </Button>
         </div>
 
@@ -152,7 +175,7 @@ const Header = () => {
               })}
             </div>
           </div>
-          <div className="px-4 pt-2 pb-4">
+          <div className="px-4 pt-2 pb-4 flex flex-col gap-3">
             <Button
               variant="accent"
               size="lg"
@@ -160,6 +183,22 @@ const Header = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Solicite Orçamento
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full text-base font-bold border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+              asChild
+            >
+              <a
+                href="https://norsel.com.br/administrativo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2"
+              >
+                <User className="w-5 h-5" />
+                Área Cliente
+              </a>
             </Button>
           </div>
         </nav>

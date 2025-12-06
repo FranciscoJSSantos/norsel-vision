@@ -1,0 +1,38 @@
+/* Custom styles for React Quill to prevent layout issues */
+.quill {
+  background: white;
+}
+
+.ql-container {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.ql-editor {
+  min-height: 400px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+/* Prevent Quill from breaking layout */
+.ql-toolbar {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.ql-container {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+/* Fix any potential z-index issues */
+.ql-toolbar,
+.ql-container {
+  position: relative;
+  z-index: 1;
+}

@@ -141,25 +141,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Mapa de Localização */}
-        <div className="py-12 border-b border-primary-foreground/10">
-          <h4 className="font-heading font-semibold text-primary-foreground text-xl mb-6 text-center">
-            Nossa Localização
-          </h4>
-          <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.3899999999994!2d-37.0563!3d-10.9119!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x71ab1f1c0c7a7e7%3A0x1234567890abcdef!2sRua%20Urquiza%20Leal%2C%2098%20-%20Aracaju%2C%20SE%2C%2049020-490!5e0!3m2!1spt-BR!2sbr!4v1234567890123!5m2!1spt-BR!2sbr"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Localização Norsel Engenharia"
-            />
-          </div>
-        </div>
-
         {/* Copyright */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-primary-foreground/50 text-sm">

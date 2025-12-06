@@ -4,6 +4,7 @@ import Stats from "@/components/Stats";
 import About from "@/components/About";
 import Services from "@/components/Services";
 import Portfolio from "@/components/Portfolio";
+import ClientsCarousel from "@/components/ClientsCarousel";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 import EnergyBackground from "@/components/EnergyBackground";
@@ -53,6 +54,10 @@ const Index = () => {
 
           <ScrollRevealSection delay={200}>
             <Portfolio />
+          </ScrollRevealSection>
+
+          <ScrollRevealSection delay={225}>
+            <ClientsCarousel />
           </ScrollRevealSection>
 
           <ScrollRevealSection delay={250}>

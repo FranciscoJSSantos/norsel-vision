@@ -45,7 +45,7 @@ const Contato = () => {
 
     // Redirecionar para WhatsApp
     window.open(
-      `https://wa.me/5579998414129?text=${mensagemWhatsApp}`,
+      `https://wa.me/5579998305785?text=${mensagemWhatsApp}`,
       "_blank"
     );
 

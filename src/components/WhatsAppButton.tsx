@@ -2,9 +2,13 @@ import { MessageCircle } from "lucide-react";
 
 const WhatsAppButton = () => {
   const handleWhatsAppClick = () => {
-    const mensagem = "Olá! Gostaria de saber mais sobre os serviços da Norsel Engenharia.";
+    const mensagem =
+      "Olá! Gostaria de saber mais sobre os serviços da Norsel Engenharia.";
     const mensagemEncoded = encodeURIComponent(mensagem);
-    window.open(`https://wa.me/5579998414129?text=${mensagemEncoded}`, "_blank");
+    window.open(
+      `https://wa.me/5579998305785?text=${mensagemEncoded}`,
+      "_blank"
+    );
   };
 
   return (
