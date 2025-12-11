@@ -3,18 +3,12 @@ import { useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "@/styles/quill-custom.css";
-import { useCreatePost, useCategories, useTags, useAuthors } from "@/hooks/useBlog";
+import { useCreatePost, useUniqueAuthors, useUniqueCategories } from "@/hooks/useBlog";
+import ComboboxInput from "@/components/ComboboxInput";
 import { blogApi } from "@/services/blogApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, Eye, Upload, Sparkles, Loader2, X, Image as ImageIcon } from "lucide-react";
 import Header from "@/components/Header";
@@ -24,9 +18,8 @@ import { toast } from "sonner";
 const CreatePost = () => {
   const navigate = useNavigate();
   const createPost = useCreatePost();
-  const { data: categories = [] } = useCategories();
-  const { data: tags = [] } = useTags();
-  const { data: authors = [] } = useAuthors();
+  const { data: uniqueAuthors = [] } = useUniqueAuthors();
+  const { data: uniqueCategories = [] } = useUniqueCategories();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -35,8 +28,8 @@ const CreatePost = () => {
     excerpt: "",
     featured_image: "",
     status: "draft" as "draft" | "published" | "archived",
-    category_id: "",
-    author_id: "",
+    category: "",
+    author: "",
     reading_time: "",
     seo_title: "",
     seo_description: "",
@@ -114,7 +107,7 @@ const CreatePost = () => {
   };
 
   const handleSubmit = async (status: "draft" | "published") => {
-    if (!formData.title || !formData.content || !formData.author_id) {
+    if (!formData.title || !formData.content || !formData.author) {
       toast.error("Preencha os campos obrigatórios: Título, Conteúdo e Autor");
       return;
     }
@@ -127,8 +120,8 @@ const CreatePost = () => {
         excerpt: formData.excerpt || undefined,
         featured_image: formData.featured_image || undefined,
         status,
-        category_id: formData.category_id ? Number(formData.category_id) : undefined,
-        author_id: Number(formData.author_id),
+        category: formData.category || undefined,
+        author: formData.author,
         reading_time: formData.reading_time ? Number(formData.reading_time) : undefined,
         seo_title: formData.seo_title || undefined,
         seo_description: formData.seo_description || undefined,
@@ -244,23 +237,18 @@ const CreatePost = () => {
                 <Label htmlFor="author" className="text-base font-semibold">
                   Autor *
                 </Label>
-                <Select
-                  value={formData.author_id}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, author_id: value }))
+                <ComboboxInput
+                  id="author"
+                  value={formData.author}
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, author: value }))
                   }
-                >
-                  <SelectTrigger id="author">
-                    <SelectValue placeholder="Selecione o autor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {authors.map((author) => (
-                      <SelectItem key={author.id} value={author.id.toString()}>
-                        {author.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={uniqueAuthors}
+                  placeholder="Digite ou selecione um autor"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Selecione um autor existente ou digite um novo
+                </p>
               </div>
 
               {/* Categoria */}
@@ -268,23 +256,18 @@ const CreatePost = () => {
                 <Label htmlFor="category" className="text-base font-semibold">
                   Categoria
                 </Label>
-                <Select
-                  value={formData.category_id}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, category_id: value }))
+                <ComboboxInput
+                  id="category"
+                  value={formData.category}
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, category: value }))
                   }
-                >
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={uniqueCategories}
+                  placeholder="Digite ou selecione uma categoria"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Selecione uma categoria existente ou digite uma nova
+                </p>
               </div>
 
               {/* Tempo de leitura */}

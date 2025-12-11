@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,52 +10,104 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Edit, Trash2, Plus, GripVertical, X } from "lucide-react";
+import { toast } from "sonner";
 import {
-  clientLogos as initialClientLogos,
-  ClientLogo,
-} from "@/data/clientLogos";
+  useClientes,
+  useCreateCliente,
+  useUpdateCliente,
+  useDeleteCliente,
+  useReorderClientes,
+} from "@/hooks/useNorsel";
+import type { Cliente, ClienteCreate, ClienteUpdate } from "@/types/norsel";
+import ImageUpload from "@/components/ImageUpload";
 
 const Clientes = () => {
-  const [clients, setClients] = useState<ClientLogo[]>(initialClientLogos);
+  // React Query hooks
+  const { data: clientesFromApi, isLoading, error } = useClientes();
+  const createMutation = useCreateCliente();
+  const updateMutation = useUpdateCliente();
+  const deleteMutation = useDeleteCliente();
+  const reorderMutation = useReorderClientes();
+
+  // Local state para drag & drop e UI
+  const [clients, setClients] = useState<Cliente[]>([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingClient, setEditingClient] = useState<ClientLogo | null>(null);
+  const [editingClient, setEditingClient] = useState<Partial<Cliente> | null>(null);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
+  const [hasReordered, setHasReordered] = useState(false);
+
+  // Sincronizar dados da API com estado local
+  useEffect(() => {
+    if (clientesFromApi) {
+      setClients(clientesFromApi);
+    }
+  }, [clientesFromApi]);
+
+  // Mostrar erro se houver
+  useEffect(() => {
+    if (error) {
+      toast.error("Erro ao carregar clientes. Verifique se a API está rodando.");
+    }
+  }, [error]);
 
   const handleCreateClient = () => {
     setEditingClient({
       alt: "",
       src: "",
       title: "Parceiro integrador",
+      ordem: clients.length,
     });
     setIsEditDialogOpen(true);
   };
 
-  const handleEditClient = (client: ClientLogo) => {
+  const handleEditClient = (client: Cliente) => {
     setEditingClient({ ...client });
     setIsEditDialogOpen(true);
   };
 
-  const handleDeleteClient = (alt: string) => {
-    if (confirm("Tem certeza que deseja remover este cliente?")) {
-      setClients(clients.filter((c) => c.alt !== alt));
+  const handleDeleteClient = async (id: number) => {
+    if (!confirm("Tem certeza que deseja remover este cliente?")) return;
+
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.success("Cliente removido com sucesso!");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao remover cliente");
     }
   };
 
-  const handleSaveClient = () => {
+  const handleSaveClient = async () => {
     if (!editingClient) return;
 
-    const existingIndex = clients.findIndex((c) => c.alt === editingClient.alt);
-
-    if (existingIndex !== -1) {
-      setClients(
-        clients.map((c) => (c.alt === editingClient.alt ? editingClient : c))
-      );
-    } else {
-      setClients([...clients, editingClient]);
+    // Validações
+    if (!editingClient.alt || !editingClient.src || !editingClient.title) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
     }
-    setIsEditDialogOpen(false);
-    setEditingClient(null);
+
+    try {
+      if (editingClient.id) {
+        // Atualizar
+        const { id, created_at, updated_at, ...updateData } = editingClient as Cliente;
+        await updateMutation.mutateAsync({ id, cliente: updateData as ClienteUpdate });
+        toast.success("Cliente atualizado com sucesso!");
+      } else {
+        // Criar
+        const { id, created_at, updated_at, ...createData } = editingClient as any;
+        await createMutation.mutateAsync(createData as ClienteCreate);
+        toast.success("Cliente criado com sucesso!");
+      }
+      setIsEditDialogOpen(false);
+      setEditingClient(null);
+    } catch (error: any) {
+      // Tratar erro de duplicação
+      if (error.message?.includes("já existe")) {
+        toast.error("Já existe um cliente com este nome");
+      } else {
+        toast.error(error.message || "Erro ao salvar cliente");
+      }
+    }
   };
 
   const handleDragStart = (index: number) => {
@@ -73,11 +125,46 @@ const Clientes = () => {
 
     setClients(newClients);
     setDraggedItem(index);
+    setHasReordered(true);
   };
 
-  const handleDragEnd = () => {
+  const handleDragEnd = async () => {
     setDraggedItem(null);
+
+    if (hasReordered) {
+      // Salvar nova ordem na API
+      const reorderData = clients.map((cliente, index) => ({
+        id: cliente.id,
+        ordem: index,
+      }));
+
+      try {
+        await reorderMutation.mutateAsync(reorderData);
+        toast.success("Ordem dos clientes atualizada!");
+        setHasReordered(false);
+      } catch (error: any) {
+        toast.error("Erro ao reordenar clientes");
+      }
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-20">
+          <section className="bg-primary py-16 md:py-20">
+            <div className="container mx-auto px-4">
+              <div className="flex justify-center items-center h-32">
+                <p className="text-lg text-primary-foreground">Carregando clientes...</p>
+              </div>
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,7 +225,7 @@ const Clientes = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {clients.map((client, index) => (
                   <div
-                    key={client.alt}
+                    key={client.id}
                     draggable={isEditMode}
                     onDragStart={() => handleDragStart(index)}
                     onDragOver={(e) => handleDragOver(e, index)}
@@ -169,7 +256,7 @@ const Clientes = () => {
                             variant="outline"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDeleteClient(client.alt);
+                              handleDeleteClient(client.id);
                             }}
                             className="h-7 w-7 p-0"
                           >
@@ -199,7 +286,7 @@ const Clientes = () => {
               <>
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-heading font-bold">
-                    {clients.find((c) => c.alt === editingClient.alt)
+                    {editingClient.id
                       ? "Editar Cliente"
                       : "Adicionar Novo Cliente"}
                   </DialogTitle>
@@ -211,7 +298,7 @@ const Clientes = () => {
                       Nome do Cliente
                     </label>
                     <Input
-                      value={editingClient.alt}
+                      value={editingClient.alt || ""}
                       onChange={(e) =>
                         setEditingClient({
                           ...editingClient,
@@ -227,7 +314,7 @@ const Clientes = () => {
                       Título (tooltip)
                     </label>
                     <Input
-                      value={editingClient.title}
+                      value={editingClient.title || ""}
                       onChange={(e) =>
                         setEditingClient({
                           ...editingClient,
@@ -238,44 +325,17 @@ const Clientes = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">
-                      URL da Logo
-                    </label>
-                    <Input
-                      value={editingClient.src}
-                      onChange={(e) =>
-                        setEditingClient({
-                          ...editingClient,
-                          src: e.target.value,
-                        })
-                      }
-                      placeholder="Ex: @assets/clientes/logo.png"
-                    />
-                  </div>
-
-                  {editingClient.src && (
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">
-                        Prévia da Logo
-                      </label>
-                      <div className="border border-slate-200 rounded-lg p-4 h-28 flex items-center justify-center bg-white">
-                        <img
-                          src={editingClient.src}
-                          alt={editingClient.alt}
-                          className="max-w-full max-h-full object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display =
-                              "none";
-                            (
-                              e.target as HTMLImageElement
-                            ).parentElement!.innerHTML +=
-                              '<p class="text-sm text-muted-foreground">Imagem não encontrada</p>';
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                  <ImageUpload
+                    currentImage={editingClient.src}
+                    onImageChange={(imageUrl) =>
+                      setEditingClient({
+                        ...editingClient,
+                        src: imageUrl,
+                      })
+                    }
+                    folder="clientes"
+                    label="Logo do Cliente"
+                  />
 
                   <div className="flex gap-2 pt-4">
                     <Button
@@ -292,9 +352,17 @@ const Clientes = () => {
                       variant="default"
                       onClick={handleSaveClient}
                       className="flex-1"
-                      disabled={!editingClient.alt || !editingClient.src}
+                      disabled={
+                        !editingClient.alt ||
+                        !editingClient.src ||
+                        !editingClient.title ||
+                        createMutation.isPending ||
+                        updateMutation.isPending
+                      }
                     >
-                      Salvar
+                      {createMutation.isPending || updateMutation.isPending
+                        ? "Salvando..."
+                        : "Salvar"}
                     </Button>
                   </div>
                 </div>

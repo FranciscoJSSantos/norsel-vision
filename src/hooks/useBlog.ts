@@ -79,3 +79,43 @@ export const useAuthors = () => {
     queryFn: () => blogApi.users.getAll(),
   });
 };
+
+// Hook para buscar autores únicos dos posts
+export const useUniqueAuthors = () => {
+  return useQuery({
+    queryKey: ["unique-authors"],
+    queryFn: async () => {
+      const posts = await blogApi.posts.getAll();
+      const authors = posts
+        .map((post) => {
+          // Pode ser string ou objeto { name: string }
+          if (typeof post.author === 'string') {
+            return post.author;
+          }
+          return post.author?.name;
+        })
+        .filter(Boolean) as string[];
+      return Array.from(new Set(authors)).sort();
+    },
+  });
+};
+
+// Hook para buscar categorias únicas dos posts
+export const useUniqueCategories = () => {
+  return useQuery({
+    queryKey: ["unique-categories"],
+    queryFn: async () => {
+      const posts = await blogApi.posts.getAll();
+      const categories = posts
+        .map((post) => {
+          // Pode ser string ou objeto { name: string }
+          if (typeof post.category === 'string') {
+            return post.category;
+          }
+          return post.category?.name;
+        })
+        .filter(Boolean) as string[];
+      return Array.from(new Set(categories)).sort();
+    },
+  });
+};

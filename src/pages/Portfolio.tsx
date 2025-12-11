@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -13,88 +13,53 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, Edit, Trash2, Plus, GripVertical, X } from "lucide-react";
-import arena_gm_society from "@/assets/portfolio/arena_gm_society.png";
-import rt_alevinos from "@/assets/portfolio/rt_alevinos.png";
-import fabio_especialista_solar from "@/assets/portfolio/fabio_especialista_solar.png";
-import hotel_tropical from "@/assets/portfolio/hotel_tropical.png";
-import maggs_sanduiches from "@/assets/portfolio/maggs_sanduiches.png";
-import santa_pizza_gourmet from "@/assets/portfolio/santa_pizza_gourmet.png";
-
-interface Projeto {
-  id: number;
-  nome: string;
-  local: string;
-  ano: string;
-  descricao: string;
-  imagem: string;
-}
-
-const initialProjects: Projeto[] = [
-  {
-    id: 1,
-    nome: "Arena GM Society",
-    local: "Ametista do Sul - RS",
-    ano: "2024",
-    descricao:
-      "Usina fotovoltaica em complexo esportivo, com layout otimizado, segurança elétrica e alto rendimento.",
-    imagem: arena_gm_society,
-  },
-  {
-    id: 2,
-    nome: "RT Alevinos",
-    local: "RS",
-    ano: "2023",
-    descricao:
-      "Sistema fotovoltaico para operação contínua, com proteção adequada e excelente relação custo‑benefício.",
-    imagem: rt_alevinos,
-  },
-  {
-    id: 3,
-    nome: "Fábio Especialista Solar",
-    local: "",
-    ano: "2025",
-    descricao:
-      "Projeto fotovoltaico com dimensionamento preciso, cabeamento organizado e conformidade com normas e concessionária.",
-    imagem: fabio_especialista_solar,
-  },
-  {
-    id: 4,
-    nome: "Hotel Tropical",
-    local: "",
-    ano: "2025",
-    descricao:
-      "Solução on‑grid para hotelaria, integrando estética do telhado, monitoramento e segurança operacional.",
-    imagem: hotel_tropical,
-  },
-  {
-    id: 5,
-    nome: "Santa Pizza Gourmet",
-    local: "",
-    ano: "",
-    descricao:
-      "Sistema comercial on‑grid focado em economia mensal e confiabilidade, com comissionamento completo.",
-    imagem: santa_pizza_gourmet,
-  },
-  {
-    id: 6,
-    nome: "Magg's Sanduíches",
-    local: "",
-    ano: "",
-    descricao:
-      "Projeto para estabelecimento comercial com estudo de carga, execução limpa e padronização elétrica.",
-    imagem: maggs_sanduiches,
-  },
-];
+import { toast } from "sonner";
+import {
+  useProjetos,
+  useCreateProjeto,
+  useUpdateProjeto,
+  useDeleteProjeto,
+  useReorderProjetos,
+} from "@/hooks/useNorsel";
+import type { Projeto, ProjetoCreate, ProjetoUpdate } from "@/types/norsel";
+import ImageUpload from "@/components/ImageUpload";
 
 const Portfolio = () => {
-  const [projects, setProjects] = useState<Projeto[]>(initialProjects);
+  // React Query hooks
+  const { data: projetosFromApi, isLoading, error } = useProjetos();
+  const createMutation = useCreateProjeto();
+  const updateMutation = useUpdateProjeto();
+  const deleteMutation = useDeleteProjeto();
+  const reorderMutation = useReorderProjetos();
+
+  // Local state para drag & drop e UI
+  const [projects, setProjects] = useState<Projeto[]>([]);
   const [selectedProject, setSelectedProject] = useState<Projeto | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Projeto | null>(null);
+  const [editingProject, setEditingProject] = useState<Partial<Projeto> | null>(
+    null
+  );
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
+  const [hasReordered, setHasReordered] = useState(false);
   const navigate = useNavigate();
+
+  // Sincronizar dados da API com estado local
+  useEffect(() => {
+    if (projetosFromApi) {
+      setProjects(projetosFromApi);
+    }
+  }, [projetosFromApi]);
+
+  // Mostrar erro se houver
+  useEffect(() => {
+    if (error) {
+      toast.error(
+        "Erro ao carregar projetos. Verifique se a API está rodando."
+      );
+    }
+  }, [error]);
 
   const openDialog = (projeto: Projeto) => {
     setSelectedProject(projeto);
@@ -114,14 +79,13 @@ const Portfolio = () => {
   };
 
   const handleCreateProject = () => {
-    const newId = Math.max(...projects.map((p) => p.id), 0) + 1;
     setEditingProject({
-      id: newId,
       nome: "",
       local: "",
       ano: "",
       descricao: "",
       imagem: "",
+      ordem: projects.length,
     });
     setIsEditDialogOpen(true);
   };
@@ -131,24 +95,54 @@ const Portfolio = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleDeleteProject = (id: number) => {
-    if (confirm("Tem certeza que deseja remover este projeto?")) {
-      setProjects(projects.filter((p) => p.id !== id));
+  const handleDeleteProject = async (id: number) => {
+    if (!confirm("Tem certeza que deseja remover este projeto?")) return;
+
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.success("Projeto removido com sucesso!");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao remover projeto");
     }
   };
 
-  const handleSaveProject = () => {
+  const handleSaveProject = async () => {
     if (!editingProject) return;
 
-    if (projects.find((p) => p.id === editingProject.id)) {
-      setProjects(
-        projects.map((p) => (p.id === editingProject.id ? editingProject : p))
-      );
-    } else {
-      setProjects([...projects, editingProject]);
+    // Validações
+    if (
+      !editingProject.nome ||
+      !editingProject.descricao ||
+      !editingProject.ano ||
+      !editingProject.local ||
+      !editingProject.imagem
+    ) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
     }
-    setIsEditDialogOpen(false);
-    setEditingProject(null);
+
+    try {
+      if (editingProject.id) {
+        // Atualizar
+        const { id, created_at, updated_at, ...updateData } =
+          editingProject as Projeto;
+        await updateMutation.mutateAsync({
+          id,
+          projeto: updateData as ProjetoUpdate,
+        });
+        toast.success("Projeto atualizado com sucesso!");
+      } else {
+        // Criar
+        const { id, created_at, updated_at, ...createData } =
+          editingProject as any;
+        await createMutation.mutateAsync(createData as ProjetoCreate);
+        toast.success("Projeto criado com sucesso!");
+      }
+      setIsEditDialogOpen(false);
+      setEditingProject(null);
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao salvar projeto");
+    }
   };
 
   const handleDragStart = (index: number) => {
@@ -166,11 +160,46 @@ const Portfolio = () => {
 
     setProjects(newProjects);
     setDraggedItem(index);
+    setHasReordered(true);
   };
 
-  const handleDragEnd = () => {
+  const handleDragEnd = async () => {
     setDraggedItem(null);
+
+    if (hasReordered) {
+      // Salvar nova ordem na API
+      const reorderData = projects.map((projeto, index) => ({
+        id: projeto.id,
+        ordem: index,
+      }));
+
+      try {
+        await reorderMutation.mutateAsync(reorderData);
+        toast.success("Ordem dos projetos atualizada!");
+        setHasReordered(false);
+      } catch (error: any) {
+        toast.error("Erro ao reordenar projetos");
+      }
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-32 pb-20">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-center items-center h-64">
+              <p className="text-lg text-muted-foreground">
+                Carregando projetos...
+              </p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -402,7 +431,7 @@ const Portfolio = () => {
                   <>
                     <DialogHeader>
                       <DialogTitle className="text-2xl font-heading font-bold">
-                        {projects.find((p) => p.id === editingProject.id)
+                        {editingProject.id
                           ? "Editar Projeto"
                           : "Criar Novo Projeto"}
                       </DialogTitle>
@@ -414,7 +443,7 @@ const Portfolio = () => {
                           Nome do Projeto
                         </label>
                         <Input
-                          value={editingProject.nome}
+                          value={editingProject.nome || ""}
                           onChange={(e) =>
                             setEditingProject({
                               ...editingProject,
@@ -431,7 +460,7 @@ const Portfolio = () => {
                             Local
                           </label>
                           <Input
-                            value={editingProject.local}
+                            value={editingProject.local || ""}
                             onChange={(e) =>
                               setEditingProject({
                                 ...editingProject,
@@ -446,7 +475,7 @@ const Portfolio = () => {
                             Ano
                           </label>
                           <Input
-                            value={editingProject.ano}
+                            value={editingProject.ano || ""}
                             onChange={(e) =>
                               setEditingProject({
                                 ...editingProject,
@@ -463,7 +492,7 @@ const Portfolio = () => {
                           Descrição
                         </label>
                         <Textarea
-                          value={editingProject.descricao}
+                          value={editingProject.descricao || ""}
                           onChange={(e) =>
                             setEditingProject({
                               ...editingProject,
@@ -475,21 +504,17 @@ const Portfolio = () => {
                         />
                       </div>
 
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">
-                          URL da Imagem
-                        </label>
-                        <Input
-                          value={editingProject.imagem}
-                          onChange={(e) =>
-                            setEditingProject({
-                              ...editingProject,
-                              imagem: e.target.value,
-                            })
-                          }
-                          placeholder="Ex: @assets/portfolio/projeto.png"
-                        />
-                      </div>
+                      <ImageUpload
+                        currentImage={editingProject.imagem}
+                        onImageChange={(imageUrl) =>
+                          setEditingProject({
+                            ...editingProject,
+                            imagem: imageUrl,
+                          })
+                        }
+                        folder="projetos"
+                        label="Imagem do Projeto"
+                      />
 
                       <div className="flex gap-2 pt-4">
                         <Button
@@ -507,10 +532,18 @@ const Portfolio = () => {
                           onClick={handleSaveProject}
                           className="flex-1"
                           disabled={
-                            !editingProject.nome || !editingProject.descricao
+                            !editingProject.nome ||
+                            !editingProject.descricao ||
+                            !editingProject.ano ||
+                            !editingProject.local ||
+                            !editingProject.imagem ||
+                            createMutation.isPending ||
+                            updateMutation.isPending
                           }
                         >
-                          Salvar
+                          {createMutation.isPending || updateMutation.isPending
+                            ? "Salvando..."
+                            : "Salvar"}
                         </Button>
                       </div>
                     </div>

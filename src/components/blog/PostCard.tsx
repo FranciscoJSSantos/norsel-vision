@@ -40,7 +40,7 @@ const PostCard = ({ post, onClick }: PostCardProps) => {
           {post.category && (
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-accent/10 text-accent rounded-full font-medium">
               <Tag className="w-3.5 h-3.5" />
-              {post.category.name}
+              {typeof post.category === 'string' ? post.category : post.category.name}
             </span>
           )}
 
@@ -72,7 +72,7 @@ const PostCard = ({ post, onClick }: PostCardProps) => {
         {/* Author & Views */}
         <div className="flex items-center justify-between pt-4 border-t border-border">
           <div className="flex items-center gap-2">
-            {post.author.avatar ? (
+            {'avatar' in post.author && post.author.avatar ? (
               <img
                 src={post.author.avatar}
                 alt={post.author.name}

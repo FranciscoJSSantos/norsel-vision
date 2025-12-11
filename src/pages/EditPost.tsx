@@ -6,10 +6,10 @@ import "@/styles/quill-custom.css";
 import {
   usePost,
   useUpdatePost,
-  useCategories,
-  useTags,
-  useAuthors,
+  useUniqueAuthors,
+  useUniqueCategories,
 } from "@/hooks/useBlog";
+import ComboboxInput from "@/components/ComboboxInput";
 import { blogApi } from "@/services/blogApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,9 +32,8 @@ const EditPost = () => {
   const navigate = useNavigate();
   const { data: post, isLoading } = usePost(Number(id));
   const updatePost = useUpdatePost();
-  const { data: categories = [] } = useCategories();
-  const { data: tags = [] } = useTags();
-  const { data: authors = [] } = useAuthors();
+  const { data: uniqueAuthors = [] } = useUniqueAuthors();
+  const { data: uniqueCategories = [] } = useUniqueCategories();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -43,8 +42,8 @@ const EditPost = () => {
     excerpt: "",
     featured_image: "",
     status: "draft" as "draft" | "published" | "archived",
-    category_id: "",
-    author_id: "",
+    category: "",
+    author: "",
     reading_time: "",
     seo_title: "",
     seo_description: "",
@@ -59,6 +58,16 @@ const EditPost = () => {
   // Carregar dados do post quando disponível
   useEffect(() => {
     if (post) {
+      // Extrair nome da categoria (pode ser string ou objeto)
+      const categoryName = typeof post.category === 'string'
+        ? post.category
+        : post.category?.name || "";
+
+      // Extrair nome do autor (pode ser string ou objeto)
+      const authorName = typeof post.author === 'string'
+        ? post.author
+        : post.author?.name || "";
+
       setFormData({
         title: post.title,
         slug: post.slug,
@@ -66,8 +75,8 @@ const EditPost = () => {
         excerpt: post.excerpt || "",
         featured_image: post.featured_image || "",
         status: post.status,
-        category_id: post.category_id?.toString() || "",
-        author_id: post.author_id.toString(),
+        category: categoryName,
+        author: authorName,
         reading_time: post.reading_time?.toString() || "",
         seo_title: post.seo_title || "",
         seo_description: post.seo_description || "",
@@ -142,8 +151,8 @@ const EditPost = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.title || !formData.content) {
-      toast.error("Preencha os campos obrigatórios: Título e Conteúdo");
+    if (!formData.title || !formData.content || !formData.author) {
+      toast.error("Preencha os campos obrigatórios: Título, Conteúdo e Autor");
       return;
     }
 
@@ -159,9 +168,8 @@ const EditPost = () => {
           excerpt: formData.excerpt || undefined,
           featured_image: formData.featured_image || undefined,
           status: formData.status,
-          category_id: formData.category_id
-            ? Number(formData.category_id)
-            : undefined,
+          category: formData.category || undefined,
+          author: formData.author,
           reading_time: formData.reading_time
             ? Number(formData.reading_time)
             : undefined,
@@ -313,23 +321,18 @@ const EditPost = () => {
                 <Label htmlFor="author" className="text-base font-semibold">
                   Autor *
                 </Label>
-                <Select
-                  value={formData.author_id}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, author_id: value }))
+                <ComboboxInput
+                  id="author"
+                  value={formData.author}
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, author: value }))
                   }
-                >
-                  <SelectTrigger id="author">
-                    <SelectValue placeholder="Selecione o autor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {authors.map((author) => (
-                      <SelectItem key={author.id} value={author.id.toString()}>
-                        {author.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={uniqueAuthors}
+                  placeholder="Digite ou selecione um autor"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Selecione um autor existente ou digite um novo
+                </p>
               </div>
 
               {/* Categoria */}
@@ -337,27 +340,18 @@ const EditPost = () => {
                 <Label htmlFor="category" className="text-base font-semibold">
                   Categoria
                 </Label>
-                <Select
-                  value={formData.category_id || "none"}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      category_id: value === "none" ? "" : value
-                    }))
+                <ComboboxInput
+                  id="category"
+                  value={formData.category}
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, category: value }))
                   }
-                >
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder="Selecione uma categoria" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Nenhuma</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  options={uniqueCategories}
+                  placeholder="Digite ou selecione uma categoria"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Selecione uma categoria existente ou digite uma nova
+                </p>
               </div>
 
               {/* Status */}

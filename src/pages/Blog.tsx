@@ -44,7 +44,9 @@ const Blog = () => {
     }
 
     if (filters.author) {
-      result = result.filter((post) => post.author_id === Number(filters.author));
+      result = result.filter(
+        (post) => post.author_id === Number(filters.author)
+      );
     }
 
     return result;
@@ -136,15 +138,8 @@ const Blog = () => {
               <div className="text-center py-20">
                 <BookOpen className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-foreground mb-2">
-                  Nenhum post encontrado
+                  Sem posts no momento, volte em breve!
                 </h3>
-                <p className="text-muted-foreground mb-6">
-                  Tente ajustar os filtros ou criar um novo post
-                </p>
-                <Button onClick={() => navigate("/blog/create")} className="gap-2">
-                  <PenSquare className="w-4 h-4" />
-                  Criar Primeiro Post
-                </Button>
               </div>
             )}
 

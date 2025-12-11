@@ -9,7 +9,7 @@ import type {
   PostFilters,
 } from "@/types/blog";
 
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 // Helper para fazer requisições
 async function apiRequest<T>(
@@ -37,7 +37,10 @@ async function apiRequest<T>(
   }
 
   // Para responses vazios (204 No Content), retornar undefined
-  if (response.status === 204 || response.headers.get('content-length') === '0') {
+  if (
+    response.status === 204 ||
+    response.headers.get("content-length") === "0"
+  ) {
     return undefined as T;
   }
 

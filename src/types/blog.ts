@@ -32,8 +32,10 @@ export interface Post {
   excerpt?: string;
   featured_image?: string;
   status: "draft" | "published" | "archived";
+  category?: string;
+  author?: string;
   category_id?: number;
-  author_id: number;
+  author_id?: number;
   views: number;
   reading_time?: number;
   seo_title?: string;
@@ -44,8 +46,8 @@ export interface Post {
 }
 
 export interface PostDetail extends Post {
-  author: User;
-  category?: Category;
+  author: User | { name: string };
+  category?: Category | string;
   tags: Tag[];
 }
 
@@ -56,8 +58,8 @@ export interface PostCreate {
   excerpt?: string;
   featured_image?: string;
   status?: "draft" | "published" | "archived";
-  category_id?: number;
-  author_id: number;
+  category?: string;
+  author: string;
   reading_time?: number;
   seo_title?: string;
   seo_description?: string;
@@ -71,7 +73,8 @@ export interface PostUpdate {
   excerpt?: string;
   featured_image?: string;
   status?: "draft" | "published" | "archived";
-  category_id?: number;
+  category?: string;
+  author?: string;
   reading_time?: number;
   seo_title?: string;
   seo_description?: string;

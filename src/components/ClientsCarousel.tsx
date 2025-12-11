@@ -1,8 +1,16 @@
-import { clientLogos } from "@/data/clientLogos";
+import { useClientes } from "@/hooks/useNorsel";
 
 const ClientsCarousel = () => {
+  // Buscar clientes da API
+  const { data: clientes, isLoading } = useClientes();
+
+  // Se estiver carregando ou não houver clientes, não renderizar nada
+  if (isLoading || !clientes || clientes.length === 0) {
+    return null;
+  }
+
   // Duplicar o array para criar o efeito de loop infinito
-  const duplicatedLogos = [...clientLogos, ...clientLogos];
+  const duplicatedLogos = [...clientes, ...clientes];
 
   return (
     <section className="py-16 bg-primary/5 overflow-hidden">

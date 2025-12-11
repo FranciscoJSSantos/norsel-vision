@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -13,97 +13,49 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, ArrowRight, Info, Edit, Trash2, Plus, GripVertical, X } from "lucide-react";
-import imgFotovoltaicas from "@/assets/servicos/solucoes_fotovoltaicas.png";
-import imgProjetosEletricos from "@/assets/servicos/projetos_eletricos_insfraestrutura.png";
-import imgOtimizacao from "@/assets/servicos/otimizacao_seguranca.png";
-import imgSustentaveis from "@/assets/servicos/solucoes_sustentaveis.png";
-import imgPericia from "@/assets/servicos/pericia_tecnica_consultoria.png";
-
-interface Servico {
-  id: number;
-  titulo: string;
-  descricao: string;
-  caracteristicas: string[];
-  imagem?: string;
-}
-
-const initialServicos: Servico[] = [
-  {
-    id: 1,
-    titulo: "Soluções Fotovoltaicas",
-    descricao:
-      "Especialidade principal da empresa. Desenvolvimento de projetos fotovoltaicos personalizados para diferentes segmentos.",
-    caracteristicas: [
-      "Projetos para residências, comércios e indústrias",
-      "Soluções para usinas de grande escala",
-      "Projetos completos e customizados",
-      "Máxima eficiência e economia",
-    ],
-    imagem: imgFotovoltaicas,
-  },
-  {
-    id: 2,
-    titulo: "Projetos Elétricos e de Infraestrutura",
-    descricao:
-      "Elaboração de projetos elétricos complexos que servem como base para instalações seguras e eficientes.",
-    caracteristicas: [
-      "Conformidade rigorosa com normas técnicas vigentes",
-      "Foco em segurança nas instalações",
-      "Projetos de infraestrutura elétrica",
-      "Dimensionamento preciso e documentação completa",
-    ],
-    imagem: imgProjetosEletricos,
-  },
-  {
-    id: 3,
-    titulo: "Otimização e Segurança",
-    descricao:
-      "Serviços além do projeto inicial, focando na eficiência contínua e segurança máxima das instalações.",
-    caracteristicas: [
-      "Análise de eficiência operacional",
-      "Garantia de funcionamento contínuo",
-      "Maximização da segurança instalada",
-      "Monitoramento e manutenção preventiva",
-    ],
-    imagem: imgOtimizacao,
-  },
-  {
-    id: 4,
-    titulo: "Soluções Sustentáveis",
-    descricao:
-      "Impulsiona transição para futuro sustentável, expandindo além de projetos fotovoltaicos.",
-    caracteristicas: [
-      "Transição para energia limpa",
-      "Especialização em instalações sustentáveis",
-      "Foco ambiental e redução de impactos",
-      "Consultoria para sustentabilidade energética",
-    ],
-    imagem: imgSustentaveis,
-  },
-  {
-    id: 5,
-    titulo: "Perícia Técnica e Consultoria",
-    descricao:
-      "Oferece expertise especializada para análises direcionadas e orientação estratégica.",
-    caracteristicas: [
-      "Análises técnicas especializadas",
-      "Consultoria estratégica",
-      "Parecer técnico profundo",
-      "Laudos e avaliações técnicas",
-    ],
-    imagem: imgPericia,
-  },
-];
+import { toast } from "sonner";
+import {
+  useServicos,
+  useCreateServico,
+  useUpdateServico,
+  useDeleteServico,
+  useReorderServicos,
+} from "@/hooks/useNorsel";
+import type { Servico, ServicoCreate, ServicoUpdate } from "@/types/norsel";
+import ImageUpload from "@/components/ImageUpload";
 
 const Servicos = () => {
-  const [servicos, setServicos] = useState<Servico[]>(initialServicos);
+  // React Query hooks
+  const { data: servicosFromApi, isLoading, error } = useServicos();
+  const createMutation = useCreateServico();
+  const updateMutation = useUpdateServico();
+  const deleteMutation = useDeleteServico();
+  const reorderMutation = useReorderServicos();
+
+  // Local state para drag & drop e UI
+  const [servicos, setServicos] = useState<Servico[]>([]);
   const [selectedServico, setSelectedServico] = useState<Servico | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingServico, setEditingServico] = useState<Servico | null>(null);
+  const [editingServico, setEditingServico] = useState<Partial<Servico> | null>(null);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
+  const [hasReordered, setHasReordered] = useState(false);
   const navigate = useNavigate();
+
+  // Sincronizar dados da API com estado local
+  useEffect(() => {
+    if (servicosFromApi) {
+      setServicos(servicosFromApi);
+    }
+  }, [servicosFromApi]);
+
+  // Mostrar erro se houver
+  useEffect(() => {
+    if (error) {
+      toast.error("Erro ao carregar serviços. Verifique se a API está rodando.");
+    }
+  }, [error]);
 
   const openDialog = (servico: Servico) => {
     setSelectedServico(servico);
@@ -123,13 +75,12 @@ const Servicos = () => {
   };
 
   const handleCreateServico = () => {
-    const newId = Math.max(...servicos.map((s) => s.id), 0) + 1;
     setEditingServico({
-      id: newId,
       titulo: "",
       descricao: "",
       caracteristicas: [],
       imagem: "",
+      ordem: servicos.length,
     });
     setIsEditDialogOpen(true);
   };
@@ -139,24 +90,43 @@ const Servicos = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleDeleteServico = (id: number) => {
-    if (confirm("Tem certeza que deseja remover este serviço?")) {
-      setServicos(servicos.filter((s) => s.id !== id));
+  const handleDeleteServico = async (id: number) => {
+    if (!confirm("Tem certeza que deseja remover este serviço?")) return;
+
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast.success("Serviço removido com sucesso!");
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao remover serviço");
     }
   };
 
-  const handleSaveServico = () => {
+  const handleSaveServico = async () => {
     if (!editingServico) return;
 
-    if (servicos.find((s) => s.id === editingServico.id)) {
-      setServicos(
-        servicos.map((s) => (s.id === editingServico.id ? editingServico : s))
-      );
-    } else {
-      setServicos([...servicos, editingServico]);
+    // Validações
+    if (!editingServico.titulo || !editingServico.descricao || !editingServico.caracteristicas?.length) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
     }
-    setIsEditDialogOpen(false);
-    setEditingServico(null);
+
+    try {
+      if (editingServico.id) {
+        // Atualizar
+        const { id, created_at, updated_at, ...updateData } = editingServico as Servico;
+        await updateMutation.mutateAsync({ id, servico: updateData as ServicoUpdate });
+        toast.success("Serviço atualizado com sucesso!");
+      } else {
+        // Criar
+        const { id, created_at, updated_at, ...createData } = editingServico as any;
+        await createMutation.mutateAsync(createData as ServicoCreate);
+        toast.success("Serviço criado com sucesso!");
+      }
+      setIsEditDialogOpen(false);
+      setEditingServico(null);
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao salvar serviço");
+    }
   };
 
   const handleDragStart = (index: number) => {
@@ -174,11 +144,44 @@ const Servicos = () => {
 
     setServicos(newServicos);
     setDraggedItem(index);
+    setHasReordered(true);
   };
 
-  const handleDragEnd = () => {
+  const handleDragEnd = async () => {
     setDraggedItem(null);
+
+    if (hasReordered) {
+      // Salvar nova ordem na API
+      const reorderData = servicos.map((servico, index) => ({
+        id: servico.id,
+        ordem: index,
+      }));
+
+      try {
+        await reorderMutation.mutateAsync(reorderData);
+        toast.success("Ordem dos serviços atualizada!");
+        setHasReordered(false);
+      } catch (error: any) {
+        toast.error("Erro ao reordenar serviços");
+      }
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-32 pb-20">
+          <div className="container mx-auto px-4">
+            <div className="flex justify-center items-center h-64">
+              <p className="text-lg text-muted-foreground">Carregando serviços...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -376,7 +379,7 @@ const Servicos = () => {
                   <>
                     <DialogHeader>
                       <DialogTitle className="text-2xl font-heading font-bold">
-                        {servicos.find((s) => s.id === editingServico.id)
+                        {editingServico.id
                           ? "Editar Serviço"
                           : "Criar Novo Serviço"}
                       </DialogTitle>
@@ -388,7 +391,7 @@ const Servicos = () => {
                           Título do Serviço
                         </label>
                         <Input
-                          value={editingServico.titulo}
+                          value={editingServico.titulo || ""}
                           onChange={(e) =>
                             setEditingServico({
                               ...editingServico,
@@ -404,7 +407,7 @@ const Servicos = () => {
                           Descrição
                         </label>
                         <Textarea
-                          value={editingServico.descricao}
+                          value={editingServico.descricao || ""}
                           onChange={(e) =>
                             setEditingServico({
                               ...editingServico,
@@ -421,7 +424,7 @@ const Servicos = () => {
                           Características (uma por linha)
                         </label>
                         <Textarea
-                          value={editingServico.caracteristicas.join("\n")}
+                          value={editingServico.caracteristicas?.join("\n") || ""}
                           onChange={(e) =>
                             setEditingServico({
                               ...editingServico,
@@ -435,21 +438,17 @@ const Servicos = () => {
                         />
                       </div>
 
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">
-                          URL da Imagem
-                        </label>
-                        <Input
-                          value={editingServico.imagem || ""}
-                          onChange={(e) =>
-                            setEditingServico({
-                              ...editingServico,
-                              imagem: e.target.value,
-                            })
-                          }
-                          placeholder="Ex: @assets/servicos/servico.png"
-                        />
-                      </div>
+                      <ImageUpload
+                        currentImage={editingServico.imagem}
+                        onImageChange={(imageUrl) =>
+                          setEditingServico({
+                            ...editingServico,
+                            imagem: imageUrl,
+                          })
+                        }
+                        folder="servicos"
+                        label="Imagem do Serviço"
+                      />
 
                       <div className="flex gap-2 pt-4">
                         <Button
@@ -469,10 +468,14 @@ const Servicos = () => {
                           disabled={
                             !editingServico.titulo ||
                             !editingServico.descricao ||
-                            editingServico.caracteristicas.length === 0
+                            !editingServico.caracteristicas?.length ||
+                            createMutation.isPending ||
+                            updateMutation.isPending
                           }
                         >
-                          Salvar
+                          {createMutation.isPending || updateMutation.isPending
+                            ? "Salvando..."
+                            : "Salvar"}
                         </Button>
                       </div>
                     </div>
