@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { Button } from "./ui/button";
 import solarProject1 from "@/assets/solar-project-1.jpg";
@@ -26,6 +27,8 @@ const projects = [
 ];
 
 const Portfolio = () => {
+  const navigate = useNavigate();
+
   return (
     <section id="portfolio" className="py-20 md:py-32 bg-background">
       <div className="container mx-auto">
@@ -39,7 +42,7 @@ const Portfolio = () => {
               Nossos Projetos
             </h2>
           </div>
-          <Button variant="outline" size="lg">
+          <Button variant="outline" size="lg" onClick={() => navigate("/portfolio")}>
             Ver todos os projetos
             <ArrowRight className="w-4 h-4" />
           </Button>
