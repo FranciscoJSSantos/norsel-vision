@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Instagram, Linkedin, Youtube, User } from "lucide-react";
+import { Menu, X, Instagram, Linkedin, Youtube, ChevronDown, LogOut, Shield, ExternalLink } from "lucide-react";
 import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 import norselLogo from "../assets/logo_norsel_dark.png";
 import NorselLogo from "../brand/NorselLogo";
 
@@ -36,6 +44,7 @@ const socialLinks = [
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isAdmin, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -105,22 +114,50 @@ const Header = () => {
           <Button variant="accent" size="default">
             Solicite Orçamento
           </Button>
-          <Button
-            variant="outline"
-            size="default"
-            className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
-            asChild
-          >
-            <a
-              href="https://norsel.com.br/administrativo"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2"
-            >
-              <User className="w-4 h-4" />
-              Área Cliente
-            </a>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="default"
+                className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+              >
+                <Shield className="w-4 h-4" />
+                Área
+                <ChevronDown className="w-4 h-4 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem asChild>
+                <a
+                  href="https://norsel.com.br/administrativo"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Portal Cliente
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/login" className="flex items-center gap-2 cursor-pointer">
+                  <Shield className="w-4 h-4" />
+                  Portal ADM
+                </Link>
+              </DropdownMenuItem>
+              {isAdmin && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sair
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Mobile Menu Button */}
@@ -139,9 +176,9 @@ const Header = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`lg:hidden absolute top-full left-0 right-0 bg-primary backdrop-blur-md shadow-2xl transition-all duration-300 overflow-hidden ${
+        className={`lg:hidden absolute top-full left-0 right-0 bg-primary backdrop-blur-md shadow-2xl transition-all duration-300 overflow-y-auto ${
           isMobileMenuOpen
-            ? "max-h-[500px] border-t border-accent/30"
+            ? "max-h-screen border-t border-accent/30"
             : "max-h-0"
         }`}
       >
@@ -195,11 +232,41 @@ const Header = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                <User className="w-5 h-5" />
-                Área Cliente
+                <ExternalLink className="w-5 h-5" />
+                Portal Cliente
               </a>
             </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full text-base font-bold border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+              asChild
+            >
+              <Link
+                to="/login"
+                className="flex items-center justify-center gap-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Shield className="w-5 h-5" />
+                Portal ADM
+              </Link>
+            </Button>
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full text-base font-bold border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                onClick={() => {
+                  logout();
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                <LogOut className="w-5 h-5" />
+                Sair
+              </Button>
+            )}
           </div>
         </nav>
       </div>

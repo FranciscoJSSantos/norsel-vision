@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,8 @@ import type { Servico, ServicoCreate, ServicoUpdate } from "@/types/norsel";
 import ImageUpload from "@/components/ImageUpload";
 
 const Servicos = () => {
+  const { isAdmin } = useAuth();
+
   // React Query hooks
   const { data: servicosFromApi, isLoading, error } = useServicos();
   const createMutation = useCreateServico();
@@ -199,24 +202,26 @@ const Servicos = () => {
                   residências, comércios e indústrias.
                 </p>
               </div>
-              <Button
-                variant={isEditMode ? "outline" : "default"}
-                onClick={() => setIsEditMode(!isEditMode)}
-                className="self-center md:self-auto whitespace-nowrap"
-                size="lg"
-              >
-                {isEditMode ? (
-                  <>
-                    <X className="w-4 h-4" />
-                    Sair do modo edição
-                  </>
-                ) : (
-                  <>
-                    <Edit className="w-4 h-4" />
-                    Modo edição
-                  </>
-                )}
-              </Button>
+              {isAdmin && (
+                <Button
+                  variant={isEditMode ? "outline" : "default"}
+                  onClick={() => setIsEditMode(!isEditMode)}
+                  className="self-center md:self-auto whitespace-nowrap"
+                  size="lg"
+                >
+                  {isEditMode ? (
+                    <>
+                      <X className="w-4 h-4" />
+                      Sair do modo edição
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="w-4 h-4" />
+                      Modo edição
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
 
             {isEditMode && (

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,8 @@ import type { Cliente, ClienteCreate, ClienteUpdate } from "@/types/norsel";
 import ImageUpload from "@/components/ImageUpload";
 
 const Clientes = () => {
+  const { isAdmin } = useAuth();
+
   // React Query hooks
   const { data: clientesFromApi, isLoading, error } = useClientes();
   const createMutation = useCreateCliente();
@@ -178,26 +181,28 @@ const Clientes = () => {
                 <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary-foreground flex-1">
                   Clientes
                 </h1>
-                <Button
-                  variant={isEditMode ? "outline" : "secondary"}
-                  onClick={() => setIsEditMode(!isEditMode)}
-                  className={`self-center md:self-auto whitespace-nowrap ${
-                    isEditMode ? "text-primary-foreground border-primary-foreground hover:bg-primary-foreground/10" : ""
-                  }`}
-                  size="lg"
-                >
-                  {isEditMode ? (
-                    <>
-                      <X className="w-4 h-4" />
-                      Sair do modo edição
-                    </>
-                  ) : (
-                    <>
-                      <Edit className="w-4 h-4" />
-                      Modo edição
-                    </>
-                  )}
-                </Button>
+                {isAdmin && (
+                  <Button
+                    variant={isEditMode ? "outline" : "secondary"}
+                    onClick={() => setIsEditMode(!isEditMode)}
+                    className={`self-center md:self-auto whitespace-nowrap ${
+                      isEditMode ? "text-primary-foreground border-primary-foreground hover:bg-primary-foreground/10" : ""
+                    }`}
+                    size="lg"
+                  >
+                    {isEditMode ? (
+                      <>
+                        <X className="w-4 h-4" />
+                        Sair do modo edição
+                      </>
+                    ) : (
+                      <>
+                        <Edit className="w-4 h-4" />
+                        Modo edição
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
               <p className="text-lg md:text-xl text-primary-foreground/90 leading-relaxed">
                 Os projetos executados pela Norsel Engenharia foram realizados

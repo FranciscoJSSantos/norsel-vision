@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,8 @@ import type { Projeto, ProjetoCreate, ProjetoUpdate } from "@/types/norsel";
 import ImageUpload from "@/components/ImageUpload";
 
 const Portfolio = () => {
+  const { isAdmin } = useAuth();
+
   // React Query hooks
   const { data: projetosFromApi, isLoading, error } = useProjetos();
   const createMutation = useCreateProjeto();
@@ -217,24 +220,26 @@ const Portfolio = () => {
                   dedicação.
                 </p>
               </div>
-              <Button
-                variant={isEditMode ? "outline" : "default"}
-                onClick={() => setIsEditMode(!isEditMode)}
-                className="self-start md:self-auto whitespace-nowrap"
-                size="lg"
-              >
-                {isEditMode ? (
-                  <>
-                    <X className="w-4 h-4" />
-                    Sair do modo edição
-                  </>
-                ) : (
-                  <>
-                    <Edit className="w-4 h-4" />
-                    Modo edição
-                  </>
-                )}
-              </Button>
+              {isAdmin && (
+                <Button
+                  variant={isEditMode ? "outline" : "default"}
+                  onClick={() => setIsEditMode(!isEditMode)}
+                  className="self-start md:self-auto whitespace-nowrap"
+                  size="lg"
+                >
+                  {isEditMode ? (
+                    <>
+                      <X className="w-4 h-4" />
+                      Sair do modo edição
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="w-4 h-4" />
+                      Modo edição
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
 
             {isEditMode && (

@@ -8,11 +8,13 @@ import Pagination from "@/components/blog/Pagination";
 import { usePosts, useCategories, useAuthors } from "@/hooks/useBlog";
 import { Button } from "@/components/ui/button";
 import { PenSquare, Loader2, BookOpen } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const POSTS_PER_PAGE = 9;
 
 const Blog = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({
     search: "",
@@ -102,14 +104,16 @@ const Blog = () => {
                 Fique por dentro das últimas novidades sobre energia solar,
                 projetos elétricos e sustentabilidade.
               </p>
-              <Button
-                onClick={() => navigate("/blog/create")}
-                size="lg"
-                className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-              >
-                <PenSquare className="w-5 h-5" />
-                Criar Novo Post
-              </Button>
+              {isAdmin && (
+                <Button
+                  onClick={() => navigate("/blog/create")}
+                  size="lg"
+                  className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+                >
+                  <PenSquare className="w-5 h-5" />
+                  Criar Novo Post
+                </Button>
+              )}
             </div>
           </div>
         </section>

@@ -5,6 +5,7 @@ import { blogApi } from "@/services/blogApi";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +34,7 @@ import { useDeletePost } from "@/hooks/useBlog";
 const PostDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const { data: post, isLoading } = usePost(Number(id));
   const deletePost = useDeletePost();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -116,26 +118,28 @@ const PostDetail = () => {
                 Voltar
               </Button>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate(`/blog/edit/${post.id}`)}
-                  className="gap-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  Editar
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setDeleteDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Deletar
-                </Button>
-              </div>
+              {isAdmin && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/blog/edit/${post.id}`)}
+                    className="gap-2"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Deletar
+                  </Button>
+                </div>
+              )}
             </div>
 
             {/* Featured Image */}
