@@ -61,6 +61,10 @@ const Portfolio = () => {
                   src={project.image}
                   alt={project.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                  decoding="async"
+                  width="800"
+                  height="600"
                 />
               </div>
 

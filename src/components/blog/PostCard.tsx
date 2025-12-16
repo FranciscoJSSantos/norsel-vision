@@ -25,6 +25,10 @@ const PostCard = ({ post, onClick }: PostCardProps) => {
             src={post.featured_image}
             alt={post.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            decoding="async"
+            width="640"
+            height="360"
           />
         </div>
       ) : (
@@ -77,6 +81,10 @@ const PostCard = ({ post, onClick }: PostCardProps) => {
                 src={post.author.avatar}
                 alt={post.author.name}
                 className="w-8 h-8 rounded-full object-cover"
+                loading="lazy"
+                decoding="async"
+                width="32"
+                height="32"
               />
             ) : (
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">

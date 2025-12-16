@@ -259,6 +259,10 @@ const Servicos = () => {
                         src={servico.imagem}
                         alt={servico.titulo}
                         className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
+                        width="600"
+                        height="400"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent" />
                     </div>
@@ -335,6 +339,10 @@ const Servicos = () => {
                           src={selectedServico.imagem}
                           alt={selectedServico.titulo}
                           className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          width="800"
+                          height="400"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
                       </div>

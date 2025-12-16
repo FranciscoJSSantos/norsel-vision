@@ -85,6 +85,10 @@ const About = () => {
                 src={solarProject1}
                 alt="Projeto Solar Norsel"
                 className="w-full h-[400px] md:h-[500px] object-cover"
+                loading="lazy"
+                decoding="async"
+                width="800"
+                height="500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
             </div>

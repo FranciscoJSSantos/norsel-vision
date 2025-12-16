@@ -7,19 +7,19 @@ const EnergyBackground = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    // Set canvas size
+    // Set canvas size to viewport only (not entire document)
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
-      canvas.height = document.documentElement.scrollHeight;
+      canvas.height = window.innerHeight;
     };
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Energy lines configuration
+    // Energy lines configuration - REDUCED from 15 to 6 for performance
     const lines: Array<{
       x: number;
       y: number;
@@ -29,7 +29,7 @@ const EnergyBackground = () => {
       opacity: number;
     }> = [];
 
-    const lineCount = 15;
+    const lineCount = 6; // Reduced from 15
     const energyColor = '#ed8626';
 
     // Create initial lines
@@ -44,8 +44,19 @@ const EnergyBackground = () => {
       });
     }
 
+    // Throttle animation to 30 FPS instead of 60 for better performance
+    let lastTime = 0;
+    const fps = 30;
+    const interval = 1000 / fps;
+
     // Animation
-    const animate = () => {
+    const animate = (currentTime: number) => {
+      requestAnimationFrame(animate);
+
+      const deltaTime = currentTime - lastTime;
+      if (deltaTime < interval) return;
+      lastTime = currentTime - (deltaTime % interval);
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       lines.forEach((line) => {
@@ -79,29 +90,19 @@ const EnergyBackground = () => {
         ctx.lineCap = 'round';
         ctx.stroke();
 
-        // Add glow effect
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = energyColor;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+        // REMOVED shadowBlur for performance - it's very expensive
+        // Draw single particle instead of 3
+        const particleX = line.x + Math.cos(line.angle) * line.length * 0.5;
+        const particleY = line.y + Math.sin(line.angle) * line.length * 0.5;
 
-        // Draw energy particles
-        for (let i = 0; i < 3; i++) {
-          const particlePos = i / 3;
-          const particleX = line.x + Math.cos(line.angle) * line.length * particlePos;
-          const particleY = line.y + Math.sin(line.angle) * line.length * particlePos;
-
-          ctx.beginPath();
-          ctx.arc(particleX, particleY, 2, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(237, 134, 38, ${line.opacity * 0.8})`;
-          ctx.fill();
-        }
+        ctx.beginPath();
+        ctx.arc(particleX, particleY, 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(237, 134, 38, ${line.opacity * 0.8})`;
+        ctx.fill();
       });
-
-      requestAnimationFrame(animate);
     };
 
-    animate();
+    requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
